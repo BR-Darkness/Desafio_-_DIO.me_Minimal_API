@@ -5,11 +5,17 @@ using MinimalAPI.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using MinimalAPI.DTOs;
 
-#region "Builder"
+#region "Builders"
 var builder = WebApplication.CreateBuilder(args);
 
+// Escopos:
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
 
+// Swagger:
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// DbContext:
 builder.Services.AddDbContext<DbContexto>(options => {
     options.UseMySql(
         builder.Configuration.GetConnectionString("mysql"),
@@ -18,16 +24,29 @@ builder.Services.AddDbContext<DbContexto>(options => {
 });
 #endregion
 
-var app = builder.Build();
+// Realiza o build da aplicação:
+WebApplication app = builder.Build();
 
+#region "Mapeando Endpoints"
 app.MapGet("/", () => "Hello World!");
 app.MapGet("/Teste", () => "Olá Mundo!");
 
-app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico administradorServico) => {
+app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico administradorServico) => 
+{    
     if (administradorServico.Login(loginDTO) != null)
+    {
         return Results.Ok("Login com sucesso");
+    }
     else
+    {
         return Results.Unauthorized();
+    }
 });
+#endregion
 
+// Iniciando Swagger e Swagger UI:
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Iniciando a API:
 app.Run();
