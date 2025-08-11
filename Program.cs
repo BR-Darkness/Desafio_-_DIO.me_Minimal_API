@@ -5,12 +5,14 @@ using MinimalAPI.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using MinimalAPI.DTOs;
 using MinimalAPI.Dominio.ModelViews;
+using MinimalAPI.Dominio.Entidades;
 
 #region "Builders"
 var builder = WebApplication.CreateBuilder(args);
 
 // Escopos:
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
+builder.Services.AddScoped<IVeiculoServico, VeiculoServico>();
 
 // Swagger:
 builder.Services.AddEndpointsApiExplorer();
@@ -28,12 +30,12 @@ builder.Services.AddDbContext<DbContexto>(options => {
 // Realiza o build da aplicação:
 WebApplication app = builder.Build();
 
-#region "Mapeando Endpoints"
+#region "Home"
 app.MapGet("/", () => Results.Json(new Home()));
+#endregion
 
-app.MapGet("/Teste", () => "Olá Mundo!");
-
-app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico administradorServico) => 
+#region "Administradores"
+app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico administradorServico) => 
 {    
     if (administradorServico.Login(loginDTO) != null)
     {
@@ -46,9 +48,27 @@ app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico admin
 });
 #endregion
 
+#region "Veiculos"
+app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => 
+{
+    Veiculo veiculo = new()
+    {
+        Nome = veiculoDTO.Nome,
+        Marca = veiculoDTO.Marca,
+        Ano = veiculoDTO.Ano
+    };
+
+    veiculoServico.Incluir(veiculo);
+
+    return Results.Created($"/veiculo/{veiculo.Id}", veiculo);
+});
+#endregion
+
+#region "App"
 // Iniciando Swagger e Swagger UI:
 app.UseSwagger();
 app.UseSwaggerUI();
 
 // Iniciando a API:
 app.Run();
+#endregion
