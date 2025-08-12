@@ -36,6 +36,22 @@ app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
 #endregion
 
 #region "Administradores"
+static ErrosDeValidacao ValidaAdministradorDTO(AdministradorDTO administradorDTO)
+{
+    ErrosDeValidacao validacao = new();
+
+    if (string.IsNullOrEmpty(administradorDTO.Email))
+        validacao.Mensagens.Add("O campo email não pode ser vazio");
+
+    if (string.IsNullOrEmpty(administradorDTO.Senha))
+        validacao.Mensagens.Add("O campo senha não pode ser vazio");
+
+    if (administradorDTO.Perfil == null)
+        validacao.Mensagens.Add("O campo perfil não pode ser vazio");
+
+    return validacao;
+}
+
 app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministradorServico administradorServico) => 
 {    
     return (administradorServico.Login(loginDTO) != null) 
@@ -72,17 +88,7 @@ app.MapGet("/administradores/{id}", ([FromRoute] int id, IAdministradorServico a
 
 app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, IAdministradorServico administradorServico) => 
 {    
-    ErrosDeValidacao validacao = new();
-
-    if (string.IsNullOrEmpty(administradorDTO.Email))
-        validacao.Mensagens.Add("O campo email não pode ser vazio");
-
-    if (string.IsNullOrEmpty(administradorDTO.Senha))
-        validacao.Mensagens.Add("O campo senha não pode ser vazio");
-
-    if (administradorDTO.Perfil == null)
-        validacao.Mensagens.Add("O campo perfil não pode ser vazio");
-
+    ErrosDeValidacao validacao = ValidaAdministradorDTO(administradorDTO);
     if (validacao.Mensagens.Count > 0)
         return Results.BadRequest(validacao);
 
@@ -104,8 +110,7 @@ app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDTO, I
 #endregion
 
 #region "Veiculos"
-
-static ErrosDeValidacao ValidaDTO(VeiculoDTO veiculoDTO)
+static ErrosDeValidacao ValidaVeiculoDTO(VeiculoDTO veiculoDTO)
 {
     ErrosDeValidacao validacao = new();
 
@@ -123,7 +128,7 @@ static ErrosDeValidacao ValidaDTO(VeiculoDTO veiculoDTO)
 
 app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => 
 {
-    ErrosDeValidacao validacao = ValidaDTO(veiculoDTO);
+    ErrosDeValidacao validacao = ValidaVeiculoDTO(veiculoDTO);
     if (validacao.Mensagens.Count > 0)
         return Results.BadRequest(validacao);
 
@@ -157,7 +162,7 @@ app.MapPut("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO, IVeicul
     Veiculo? veiculo = veiculoServico.BuscaPorId(id);
     if (veiculo == null) return Results.NotFound();
 
-    ErrosDeValidacao validacao = ValidaDTO(veiculoDTO);
+    ErrosDeValidacao validacao = ValidaVeiculoDTO(veiculoDTO);
     if (validacao.Mensagens.Count > 0) 
         return Results.BadRequest(validacao);
 
