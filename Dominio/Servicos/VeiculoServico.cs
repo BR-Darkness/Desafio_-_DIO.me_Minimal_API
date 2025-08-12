@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinimalAPI.Dominio.Entidades;
 using MinimalAPI.Dominio.Interfaces;
-using MinimalAPI.DTOs;
+using MinimalAPI.Dominio.DTOs;
 using MinimalAPI.Infraestrutura.Db;
 
 namespace MinimalAPI.Dominio.Servicos

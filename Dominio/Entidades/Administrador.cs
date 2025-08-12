@@ -18,7 +18,7 @@ namespace MinimalAPI.Dominio.Entidades
         public string Senha { get; set; } = default!;
         
         [Required]
-        [StringLength(10)]
+        [StringLength(15)]
         public string Perfil { get; set; } = default!;
     }
 }
