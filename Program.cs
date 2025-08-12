@@ -49,8 +49,29 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDTO, IAdministra
 #endregion
 
 #region "Veiculos"
+
+ErrosDeValidacao ValidaDTO(VeiculoDTO veiculoDTO)
+{
+    ErrosDeValidacao validacao = new();
+
+    if (string.IsNullOrEmpty(veiculoDTO.Nome))
+        validacao.Mensagens.Add("O nome não pode ser um campo vazio");
+
+    if (string.IsNullOrEmpty(veiculoDTO.Marca))
+        validacao.Mensagens.Add("A marca não pode ser um campo vazio");
+
+    if (veiculoDTO.Ano < 1900)
+        validacao.Mensagens.Add("O ano de fabricação do veiculo é muito antigo, somente é aceito veiculos com anos de fabricação superiores a 1900");
+
+    return validacao;
+}
+
 app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico) => 
 {
+    ErrosDeValidacao validacao = ValidaDTO(veiculoDTO);
+    if (validacao.Mensagens.Count > 0)
+        return Results.BadRequest(validacao);
+
     Veiculo veiculo = new()
     {
         Nome = veiculoDTO.Nome,
@@ -80,6 +101,10 @@ app.MapPut("/veiculos/{id}", ([FromRoute] int id, VeiculoDTO veiculoDTO, IVeicul
 {
     Veiculo? veiculo = veiculoServico.BuscaPorId(id);
     if (veiculo == null) return Results.NotFound();
+
+    ErrosDeValidacao validacao = ValidaDTO(veiculoDTO);
+    if (validacao.Mensagens.Count > 0) 
+        return Results.BadRequest(validacao);
 
     veiculo.Nome = veiculoDTO.Nome;
     veiculo.Marca = veiculoDTO.Marca;
