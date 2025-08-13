@@ -45,7 +45,7 @@ namespace Test.Domain.Servicos
             // Assert
             Assert.AreEqual(administrador, administradorServico.BuscaPorId(administrador.Id));
             Assert.AreEqual(1, administradorServico.Todos(1).Count());
-            Assert.AreEqual(1, administradorTeste.Id);
+            Assert.AreEqual(1, administradorTeste?.Id);
         }
     }
 }
